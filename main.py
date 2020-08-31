@@ -48,12 +48,19 @@ async def on_message(message):
         f"[{date_time}]{channel}({channel.id}) |  {audpname}({auid}): {content}")
 
     if content.startswith(': '):
+        txt = content[2:]
+        symbol: dict
+        with open("symbol.json", encoding="utf-8") as f:
+            symbol = json.load(f)
+        for key, item in symbol.items():
+            if key in txt:
+                txt = txt.replace(key, item)
         goingtodiscon = False
         if vc == None:
             vc = await vch.connect()
         if vc.is_playing():
             return
-        vc.play(tts.tts(content[2:]))
+        vc.play(tts.tts(txt))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True

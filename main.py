@@ -32,6 +32,7 @@ def is_privileged(u):
 
 @client.event
 async def on_message(message):
+    global vol
     now = datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
     global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon

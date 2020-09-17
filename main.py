@@ -1,6 +1,9 @@
 import asyncio
 import json
 from datetime import datetime
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 import discord
 import tts
@@ -21,7 +24,7 @@ vc = None
 tch_list = []
 vch_list = []
 goingtodiscon = False
-vol = 0.20
+vol = 0.2
 
 def is_me(m):
     return m.author == client.user
@@ -32,7 +35,6 @@ def is_privileged(u):
 
 @client.event
 async def on_message(message):
-    global vol
     now = datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
     global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon
@@ -47,7 +49,23 @@ async def on_message(message):
 
     print(
         f"[{date_time}]{channel}({channel.id}) |  {audpname}({auid}): {content}")
-
+    if '^오^' in content:
+        goingtodiscon = False
+        if vc == None:
+            vc = await vch.connect()
+        if vc.is_playing():
+            return
+        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('teemo.mp3'), volume=0.15))
+        while vc.is_playing():
+            await asyncio.sleep(1)
+        goingtodiscon = True
+        for i in range(120):
+            await asyncio.sleep(1)
+            if not goingtodiscon:
+                break
+            if i == 119:
+                await vc.disconnect()
+                vc = None
     if content.startswith(': '):
         txt = content[2:]
         symbol: dict
@@ -61,7 +79,7 @@ async def on_message(message):
             vc = await vch.connect()
         if vc.is_playing():
             return
-        vc.play(tts.tts(txt))
+        vc.play(tts.tts(txt, vol))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
@@ -115,6 +133,4 @@ async def on_ready():
     print('------------------------------------------------------------')
     await tch.purge(limit=200, check=is_me)
 
-
-with open('credentials.json') as f:
-    client.run(json.load(f)['token'])
+client.run(os.getenv('TOKEN'))

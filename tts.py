@@ -5,15 +5,11 @@ import os
 from tempfile import gettempdir
 import json
 import discord
+from dotenv import load_dotenv
+load_dotenv()
 
-
-def tts(txt):
-    with open('credentials.json') as f:
-        credentials = json.load(f)
-
-        session = Session(aws_access_key_id=credentials['aws_access_key_id'],
-                          aws_secret_access_key=credentials['aws_secret_access_key'],
-                          region_name=credentials['region_name'])
+def tts(txt, vol):
+    session = Session(aws_access_key_id=os.getenv('AWS_ID'), aws_secret_access_key=os.getenv('AWS_KEY'), region_name=os.getenv('REGION'))
     polly = session.client("polly")
     try:
         response = polly.synthesize_speech(Text=txt, OutputFormat="mp3",
@@ -33,4 +29,4 @@ def tts(txt):
     else:
         print("Could not stream audio")
         return None
-    return discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(output), volume=0.5)
+    return discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(output), volume=vol)

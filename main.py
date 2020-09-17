@@ -55,7 +55,7 @@ async def on_message(message):
             vc = await vch.connect()
         if vc.is_playing():
             return
-        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('teemo.mp3'), volume=0.15))
+        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('teemo.mp3'), volume=0.1))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True

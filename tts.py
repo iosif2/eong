@@ -8,12 +8,12 @@ import discord
 from dotenv import load_dotenv
 load_dotenv()
 
-def tts(txt, vol):
+def tts(txt, vol, speaker):
     session = Session(aws_access_key_id=os.getenv('AWS_ID'), aws_secret_access_key=os.getenv('AWS_KEY'), region_name=os.getenv('REGION'))
     polly = session.client("polly")
     try:
         response = polly.synthesize_speech(Text=txt, OutputFormat="mp3",
-                                           VoiceId="Seoyeon")
+                                           VoiceId=speaker)
     except (BotoCoreError, ClientError) as error:
         print(error)
         return None

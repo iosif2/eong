@@ -25,6 +25,7 @@ tch_list = []
 vch_list = []
 goingtodiscon = False
 vol = 0.2
+prefix = ';'
 
 def is_me(m):
     return m.author == client.user
@@ -37,7 +38,7 @@ def is_privileged(u):
 async def on_message(message):
     now = datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-    global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon
+    global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon, prefix
     channel = message.channel
     content = str(message.content)
     audpname = message.author.display_name
@@ -66,23 +67,25 @@ async def on_message(message):
             if i == 119:
                 await vc.disconnect()
                 vc = None
-    if content.startswith(':'):
-        txt = content[1:]
+
+    if content.startswith(prefix):
+        content = content[1:]
         goingtodiscon = False
         if vc == None:
             vc = await vch.connect()
         if vc.is_playing():
             return
-        if content.startswith('::'):
-            txt = content[2:]
+        if content.startswith('t'):
+            txt = content[1:]
             vc.play(tts.tts(txt, vol, 'Takumi'))
-        elif content.startswith(':;'):
-            txt = content[2:]
+        elif content.startswith('m'):
+            txt = content[1:]
             vc.play(tts.tts(txt, vol, 'Matthew'))
-        elif content.startswith(':.'):
-            txt = content[2:]
+        elif content.startswith('f'):
+            txt = content[1:]
             vc.play(tts.tts(txt, vol, 'Filiz'))
-        else:        
+        elif content.startswith('s'):
+            txt = content[1:]
             with open("symbol.json", encoding="utf-8") as f:
                 symbol = json.load(f)
                 for key, item in symbol.items():
@@ -112,6 +115,10 @@ async def on_message(message):
         await asyncio.sleep(5)
         await sent.delete()
 
+    if content.startswith('pre'):
+        if not is_privileged(author):
+            return
+        prefix = content[3:].replace(' ', '')
     return
 
 

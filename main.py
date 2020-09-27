@@ -78,7 +78,10 @@ async def on_message(message):
             vc.play(tts.tts(txt, vol, 'Takumi'))
         elif content.startswith(':;'):
             txt = content[2:]
-            vc.play(tts.tts(txt, vol, 'Matthew'))    
+            vc.play(tts.tts(txt, vol, 'Matthew'))
+        elif content.startswith(':.'):
+            txt = content[2:]
+            vc.play(tts.tts(txt, vol, 'Filiz'))
         else:        
             with open("symbol.json", encoding="utf-8") as f:
                 symbol = json.load(f)

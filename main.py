@@ -35,7 +35,7 @@ def is_privileged(u):
     return u in guild.get_role(694430139395735642).members
 
 @client.event
-async def on_message(message):
+async def on_message(message):  
     now = datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
     global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon, prefix
@@ -53,36 +53,42 @@ async def on_message(message):
     if '^오^' in content:
         goingtodiscon = False
         if vc == None:
-            vc = await vch.connect()
+            if author.voice:
+                vc = await author.voice.channel.connect()
+            else: 
+                vc = await vch.connect()
         if vc.is_playing():
             return
         vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('teemo.mp3'), volume=0.1))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
-        for i in range(120):
+        for i in range(300):
             await asyncio.sleep(1)
             if not goingtodiscon:
                 break
-            if i == 119:
+            if i == 299:
                 await vc.disconnect()
                 vc = None
 
     if '비둘기' in content:
         goingtodiscon = False
         if vc == None:
-            vc = await vch.connect()
+            if author.voice:
+                vc = await author.voice.channel.connect()
+            else: 
+                vc = await vch.connect()
         if vc.is_playing():
             return
         vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('pigeon.mp3'), volume=0.1))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
-        for i in range(120):
+        for i in range(300):
             await asyncio.sleep(1)
             if not goingtodiscon:
                 break
-            if i == 119:
+            if i == 299:
                 await vc.disconnect()
                 vc = None
 
@@ -91,7 +97,10 @@ async def on_message(message):
         content = content[1:]
         goingtodiscon = False
         if vc == None:
-            vc = await vch.connect()
+            if author.voice:
+                vc = await author.voice.channel.connect()
+            else: 
+                vc = await vch.connect()
         if vc.is_playing():
             return
         if content.startswith('t'):
@@ -114,11 +123,11 @@ async def on_message(message):
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
-        for i in range(120):
+        for i in range(300):
             await asyncio.sleep(1)
             if not goingtodiscon:
                 break
-            if i == 119:
+            if i == 299:
                 await vc.disconnect()
                 vc = None
 
@@ -138,20 +147,21 @@ async def on_message(message):
         if not is_privileged(author):
             return
         prefix = content[3:].replace(' ', '')
-    return
 
+    if content.startswith('disconnect'):
+        if not is_privileged(author):
+            return
+        if vc:
+            await vc.disconnect()
+            vc = None
+            goingtodiscon = False
+
+    return
 
 @client.event
 async def on_ready():
     global guild, guild_id, tch, tch_id, vch, vch_id, tch_list, vch_list, vc
     guild = client.get_guild(guild_id)
-    for ch in client.get_all_channels():
-        if ch.type is discord.ChannelType.text:
-            tch_list.append(ch)
-        elif ch.type is discord.ChannelType.voice:
-            vch_list.append(ch)
-        else:
-            continue
     tch = guild.get_channel(tch_id)
     vch = guild.get_channel(vch_id)
     print('\n\n\n\nLogged in as')
@@ -159,12 +169,6 @@ async def on_ready():
     print('------------------------------------------------------------')
     print('Server Info')
     print(f"{guild.name}({guild.id})")
-    print(f"TextChannel List : ")
-    for ch in tch_list:
-        print(f"{ch.name}({ch.id})")
-    print(f"VoiceChannel List : ")
-    for ch in vch_list:
-        print(f"{ch.name}({ch.id})")
     print('------------------------------------------------------------')
     await tch.purge(limit=200, check=is_me)
 

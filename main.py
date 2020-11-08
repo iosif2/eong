@@ -134,7 +134,7 @@ async def on_message(message):
     if content.startswith('vol'):
         if not is_privileged(author):
             return
-        arg = content[1:].replace(' ', '')
+        arg = content[4:].replace(' ', '')
         if arg.__len__() > 0 and arg.isdigit():
             if 0 < int(arg) <= 100:
                 vol = int(arg) / 100

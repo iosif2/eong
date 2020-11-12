@@ -26,6 +26,11 @@ vch_list = []
 goingtodiscon = False
 vol = 0.2
 prefix = ';'
+mp3_files = {
+    '^오^': 'teemo.mp3',
+    '비둘기': 'pigeon.mp3',
+    '네이스': 'nayce.mp3'
+}
 
 def is_me(m):
     return m.author == client.user
@@ -33,6 +38,12 @@ def is_me(m):
 
 def is_privileged(u):
     return u in guild.get_role(694430139395735642).members
+
+def is_registerd(t):
+    for key in mp3_files.keys():
+        if key in t:
+            return key
+    return False
 
 @client.event
 async def on_message(message):  
@@ -50,7 +61,8 @@ async def on_message(message):
 
     print(
         f"[{date_time}]{channel}({channel.id}) |  {audpname}({auid}): {content}")
-    if '^오^' in content:
+    txt = is_registerd(content)
+    if txt:
         goingtodiscon = False
         if vc == None:
             if author.voice:
@@ -59,7 +71,7 @@ async def on_message(message):
                 vc = await vch.connect()
         if vc.is_playing():
             return
-        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('teemo.mp3'), volume=0.1))
+        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=0.2))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
@@ -70,28 +82,6 @@ async def on_message(message):
             if i == 299:
                 await vc.disconnect()
                 vc = None
-
-    if '비둘기' in content:
-        goingtodiscon = False
-        if vc == None:
-            if author.voice:
-                vc = await author.voice.channel.connect()
-            else: 
-                vc = await vch.connect()
-        if vc.is_playing():
-            return
-        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio('pigeon.mp3'), volume=0.1))
-        while vc.is_playing():
-            await asyncio.sleep(1)
-        goingtodiscon = True
-        for i in range(300):
-            await asyncio.sleep(1)
-            if not goingtodiscon:
-                break
-            if i == 299:
-                await vc.disconnect()
-                vc = None
-
 
     if content.startswith(prefix):
         content = content[1:]

@@ -29,7 +29,8 @@ prefix = ';'
 mp3_files = {
     '^오^': 'teemo.mp3',
     '비둘기': 'pigeon.mp3',
-    '네이스': 'nayce.mp3'
+    '네이스': 'nayce.mp3',
+    '기모링': 'gimoring.mp3'
 }
 
 def is_me(m):

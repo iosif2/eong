@@ -2,3 +2,4 @@ discord
 PyNaCl
 boto3
 python-dotenv
+requests

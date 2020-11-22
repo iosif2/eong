@@ -1,20 +1,19 @@
+import requests
+import tts
+import discord
 import asyncio
 import json
-from datetime import datetime
+import datetime
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
-import discord
-import tts
 
 # 추가 파일
 
-with open('config.json') as f:
-    config = json.load(f)
-    guild_id = config['guild_id']
-    tch_id = config['tch_id']
-    vch_id = config['vch_id']
+guild_id = int(os.getenv('GUILD_ID'))
+tch_id = int(os.getenv('TCH_ID'))
+vch_id = int(os.getenv('VCH_ID'))
 
 client = discord.Client()
 guild: discord.Guild
@@ -24,7 +23,7 @@ vc = None
 tch_list = []
 vch_list = []
 goingtodiscon = False
-vol = 0.2
+vol = 0.4
 prefix = ';'
 mp3_files = {
     '^오^': 'teemo.mp3',
@@ -34,12 +33,9 @@ mp3_files = {
     '빡빡이': 'bald.mp3'
 }
 
+
 def is_me(m):
     return m.author == client.user
-
-
-def is_privileged(u):
-    return u in guild.get_role(694430139395735642).members
 
 def is_registerd(t):
     for key in mp3_files.keys():
@@ -47,9 +43,40 @@ def is_registerd(t):
             return key
     return False
 
+
+async def discord_webhook(author, voice, text):
+    fields = [{'name': 'User', 'value': author.mention, 'inline': True},{'name': voice, 'value': text, 'inline': True}]
+    requests.post(
+        os.getenv('DISCORD_WEBHOOK_URL'),
+        data=json.dumps({
+            'content': '',
+            'embeds': [
+                {
+                    'title': 'TTS log',
+                    'url': 'https://github.com/losifz/GGTTS',
+                    'color': 5439232,
+                    'fields': fields,
+                    'author': {
+                        'name': 'losif',
+                        'url': 'http://losifz.com',
+                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u=4528d15da4babf939a10038f17427b44483dbc0f&v=4'
+                    },
+                    'footer': {
+                        'text': 'losif',
+                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u=4528d15da4babf939a10038f17427b44483dbc0f&v=4'
+                    },
+                    'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()   
+                }
+            ]
+
+        }),
+        headers = {'Content-Type': 'application/json; charset=utf-8'}
+    )
+
+
 @client.event
-async def on_message(message):  
-    now = datetime.now()
+async def on_message(message):
+    now = datetime.datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
     global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon, prefix
     channel = message.channel
@@ -69,11 +96,12 @@ async def on_message(message):
         if vc == None:
             if author.voice:
                 vc = await author.voice.channel.connect()
-            else: 
+            else:
                 vc = await vch.connect()
         if vc.is_playing():
             return
-        vc.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=0.2))
+        vc.play(discord.PCMVolumeTransformer(
+            original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=0.2))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
@@ -91,27 +119,33 @@ async def on_message(message):
         if vc == None:
             if author.voice:
                 vc = await author.voice.channel.connect()
-            else: 
+            else:
                 vc = await vch.connect()
         if vc.is_playing():
             return
+        voice = ''
         if content.startswith('t'):
             txt = content[1:]
-            vc.play(tts.tts(txt, vol, 'Takumi'))
+            voice = 'Takumi'
+            vc.play(tts.tts(txt, vol, voice))
         elif content.startswith('m'):
             txt = content[1:]
-            vc.play(tts.tts(txt, vol, 'Matthew'))
+            voice = 'Matthew'
+            vc.play(tts.tts(txt, vol, voice))
         elif content.startswith('f'):
             txt = content[1:]
-            vc.play(tts.tts(txt, vol, 'Filiz'))
+            voice = 'Filiz'
+            vc.play(tts.tts(txt, vol, voice))
         elif content.startswith('s'):
+            voice = 'Seoyeon'
             txt = content[1:]
             with open("symbol.json", encoding="utf-8") as f:
                 symbol = json.load(f)
                 for key, item in symbol.items():
                     if key in txt:
                         txt = txt.replace(key, item)
-                vc.play(tts.tts(txt, vol, 'Seoyeon'))
+                vc.play(tts.tts(txt, vol, voice))
+        await discord_webhook(author, voice, content[1:])
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True
@@ -124,31 +158,27 @@ async def on_message(message):
                 vc = None
 
     if content.startswith('vol'):
-        if not is_privileged(author):
-            return
         arg = content[3:].replace(' ', '')
         if arg.__len__() > 0 and arg.isdigit():
             if 0 < int(arg) <= 100:
                 vol = int(arg) / 100
-        embed = discord.Embed(title="**Volume**", description=f'{int(vol * 100)}%', color=0xff2f00)
+        embed = discord.Embed(title="**Volume**",
+                              description=f'{int(vol * 100)}%', color=0xff2f00)
         sent = await channel.send(embed=embed)
-        await asyncio.sleep(5)
+        await asyncio.sleep(30)
         await sent.delete()
 
     if content.startswith('pre'):
-        if not is_privileged(author):
-            return
         prefix = content[3:].replace(' ', '')
 
     if content.startswith('disconnect'):
-        if not is_privileged(author):
-            return
         if vc:
             await vc.disconnect()
             vc = None
             goingtodiscon = False
 
     return
+
 
 @client.event
 async def on_ready():

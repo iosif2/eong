@@ -1,4 +1,5 @@
 import requests
+from requests.api import get
 import tts
 import discord
 import asyncio
@@ -33,15 +34,30 @@ mp3_files = {
     '빡빡이': 'bald.mp3'
 }
 
+voices = {
+    't': 'Takumi',
+    'm': 'Matthew',
+    'f': 'Filiz',
+    'e': 'Enrique',
+    'z': 'Zeina',
+    'l': 'Lotte',
+    's': 'Seoyeon'
+}
 
 def is_me(m):
     return m.author == client.user
 
 def is_registerd(t):
-    for key in mp3_files.keys():
-        if key in t:
-            return key
-    return False
+    if t in mp3_files.keys():
+        return t
+    else:
+        return False
+
+def get_voice(initial):
+    if initial in voices.keys():
+        return voices[initial]
+    else:
+        return False
 
 
 async def discord_webhook(author, voice, text):
@@ -124,27 +140,19 @@ async def on_message(message):
         if vc.is_playing():
             return
         voice = ''
-        if content.startswith('t'):
-            txt = content[1:]
-            voice = 'Takumi'
-            vc.play(tts.tts(txt, vol, voice))
-        elif content.startswith('m'):
-            txt = content[1:]
-            voice = 'Matthew'
-            vc.play(tts.tts(txt, vol, voice))
-        elif content.startswith('f'):
-            txt = content[1:]
-            voice = 'Filiz'
-            vc.play(tts.tts(txt, vol, voice))
-        elif content.startswith('s'):
-            voice = 'Seoyeon'
-            txt = content[1:]
+        txt = content[1:]
+        if content.startswith('s'):
             with open("symbol.json", encoding="utf-8") as f:
                 symbol = json.load(f)
                 for key, item in symbol.items():
                     if key in txt:
                         txt = txt.replace(key, item)
-                vc.play(tts.tts(txt, vol, voice))
+        voice = get_voice(content[0])
+        if voice:
+            vc.play(tts.tts(txt, vol, voice))
+        else:
+            return
+        
         await discord_webhook(author, voice, content[1:])
         while vc.is_playing():
             await asyncio.sleep(1)

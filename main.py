@@ -48,8 +48,9 @@ def is_me(m):
     return m.author == client.user
 
 def is_registerd(t):
-    if t in mp3_files.keys():
-        return t
+    for key in mp3_files.keys():
+        if key in t:
+            return key
     else:
         return False
 

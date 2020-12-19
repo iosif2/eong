@@ -129,6 +129,7 @@ async def on_message(message):
             if i == 299:
                 await vc.disconnect()
                 vc = None
+                goingtodiscon = False
 
     if content.startswith(prefix):
         content = content[1:]
@@ -165,6 +166,7 @@ async def on_message(message):
             if i == 299:
                 await vc.disconnect()
                 vc = None
+                goingtodiscon = False
 
     if content.startswith('vol'):
         arg = content[3:].replace(' ', '')

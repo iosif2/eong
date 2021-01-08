@@ -41,7 +41,8 @@ voices = {
     'e': 'Enrique',
     'z': 'Zeina',
     'l': 'Lotte',
-    's': 'Seoyeon'
+    's': 'Seoyeon',
+    'r': 'Tatyana'
 }
 
 def is_me(m):

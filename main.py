@@ -13,16 +13,12 @@ load_dotenv()
 # 추가 파일
 
 guild_id = int(os.getenv('GUILD_ID'))
-tch_id = int(os.getenv('TCH_ID'))
 vch_id = int(os.getenv('VCH_ID'))
 
 client = discord.Client()
 guild: discord.Guild
-tch = None
 vch = None
 vc = None
-tch_list = []
-vch_list = []
 goingtodiscon = False
 vol = 0.4
 prefix = ';'
@@ -45,8 +41,10 @@ voices = {
     'r': 'Tatyana'
 }
 
+
 def is_me(m):
     return m.author == client.user
+
 
 def is_registerd(t):
     for key in mp3_files.keys():
@@ -54,6 +52,7 @@ def is_registerd(t):
             return key
     else:
         return False
+
 
 def get_voice(initial):
     if initial in voices.keys():
@@ -63,7 +62,8 @@ def get_voice(initial):
 
 
 async def discord_webhook(author, voice, text):
-    fields = [{'name': 'User', 'value': author.mention, 'inline': True},{'name': voice, 'value': text, 'inline': True}]
+    fields = [{'name': 'User', 'value': author.mention, 'inline': True}, {
+        'name': voice, 'value': text, 'inline': True}]
     requests.post(
         os.getenv('DISCORD_WEBHOOK_URL'),
         data=json.dumps({
@@ -83,12 +83,12 @@ async def discord_webhook(author, voice, text):
                         'text': 'losif',
                         'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u=4528d15da4babf939a10038f17427b44483dbc0f&v=4'
                     },
-                    'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()   
+                    'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
             ]
 
         }),
-        headers = {'Content-Type': 'application/json; charset=utf-8'}
+        headers={'Content-Type': 'application/json; charset=utf-8'}
     )
 
 
@@ -96,7 +96,7 @@ async def discord_webhook(author, voice, text):
 async def on_message(message):
     now = datetime.datetime.now()
     date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-    global tch, tch_id, vch, vch_id, guild, vc, vol, goingtodiscon, prefix
+    global vch, vch_id, guild, vc, vol, goingtodiscon, prefix
     channel = message.channel
     content = str(message.content)
     audpname = message.author.display_name
@@ -155,7 +155,7 @@ async def on_message(message):
             vc.play(tts.tts(txt, vol, voice))
         else:
             return
-        
+
         await discord_webhook(author, voice, content[1:])
         while vc.is_playing():
             await asyncio.sleep(1)
@@ -194,9 +194,8 @@ async def on_message(message):
 
 @client.event
 async def on_ready():
-    global guild, guild_id, tch, tch_id, vch, vch_id, tch_list, vch_list, vc
+    global guild, guild_id, vch, vch_id, vc
     guild = client.get_guild(guild_id)
-    tch = guild.get_channel(tch_id)
     vch = guild.get_channel(vch_id)
     print('\n\n\n\nLogged in as')
     print(f"{client.user.name}({client.user.id})")
@@ -204,6 +203,5 @@ async def on_ready():
     print('Server Info')
     print(f"{guild.name}({guild.id})")
     print('------------------------------------------------------------')
-    await tch.purge(limit=200, check=is_me)
 
 client.run(os.getenv('TOKEN'))

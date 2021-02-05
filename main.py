@@ -38,7 +38,7 @@ voices = {
     'z': 'Zeina',
     'l': 'Lotte',
     's': 'Seoyeon',
-    'r': 'Tatyana'
+    'р': 'Tatyana'
 }
 
 

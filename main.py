@@ -27,7 +27,8 @@ mp3_files = {
     '비둘기': 'pigeon.mp3',
     '네이스': 'nayce.mp3',
     '기모링': 'gimoring.mp3',
-    '빡빡이': 'bald.mp3'
+    '빡빡이': 'bald.mp3',
+    '무야호': 'muyaho.mp3'
 }
 
 voices = {

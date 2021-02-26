@@ -29,8 +29,9 @@ mp3_files = {
     '기모링': 'gimoring.mp3',
     '빡빡이': 'bald.mp3',
     '무야호': 'muyaho.mp3',
-    'sop': 'sop.mp3',
-    'myh': 'myh.mp3'
+    '시옹포포': 'sop.mp3',
+    'muyaho': 'myh.mp3',
+    'ㅇㅈㅇㅈㅎㄴ': 'dizzy.mp3'
 }
 
 voices = {

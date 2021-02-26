@@ -133,3 +133,4 @@ dmypy.json
 log.txt
 credentials.json
 .vscode
+.DS_Store

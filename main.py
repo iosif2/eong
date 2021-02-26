@@ -32,7 +32,8 @@ mp3_files = {
     '시옹포포': 'sop.mp3',
     'muyaho': 'myh.mp3',
     'ㅇㅈㅇㅈㅎㄴ': 'dizzy.mp3',
-    '🖕': 'fy.mp3'
+    '🖕': 'fy.mp3',
+    'ㅃ!ㅃ!': 'bye.mp3'
 }
 
 voices = {

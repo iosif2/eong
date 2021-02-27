@@ -126,7 +126,7 @@ async def on_message(message):
         if vc.is_playing():
             return
         vc.play(discord.PCMVolumeTransformer(
-            original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=0.2))
+            original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=vol))
         while vc.is_playing():
             await asyncio.sleep(1)
         goingtodiscon = True

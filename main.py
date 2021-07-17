@@ -1,3 +1,4 @@
+#!venv/bin/python
 import requests
 from requests.api import get
 import tts
@@ -14,7 +15,6 @@ load_dotenv()
 
 guild_id = int(os.getenv('GUILD_ID'))
 vch_id = int(os.getenv('VCH_ID'))
-
 client = discord.Client()
 guild: discord.Guild
 vch = None

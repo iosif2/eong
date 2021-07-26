@@ -1,6 +1,5 @@
 #!venv/bin/python
 import requests
-from requests.api import get
 import tts
 import discord
 import asyncio
@@ -8,21 +7,14 @@ import json
 import datetime
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 
-
-# 추가 파일
-
-guild_id = int(os.getenv('GUILD_ID'))
-vch_id = int(os.getenv('VCH_ID'))
 client = discord.Client()
-guild: discord.Guild
-vch = None
-vc = None
-goingtodiscon = False
+voiceClient = None
 vol = 0.4
 prefix = ';'
-mp3_files = {
+keywords = {
     '^오^': 'teemo.mp3',
     '비둘기': 'pigeon.mp3',
     '네이스': 'nayce.mp3',
@@ -53,8 +45,8 @@ def is_me(m):
     return m.author == client.user
 
 
-def is_registerd(t):
-    for key in mp3_files.keys():
+def is_registered(t):
+    for key in keywords.keys():
         if key in t:
             return key
     else:
@@ -78,17 +70,19 @@ async def discord_webhook(author, voice, text):
             'embeds': [
                 {
                     'title': 'TTS log',
-                    'url': 'https://github.com/losifz/GGTTS',
+                    'url': 'https://github.com/pushedq/GGTTS',
                     'color': 5439232,
                     'fields': fields,
                     'author': {
-                        'name': 'losif',
-                        'url': 'http://losifz.com',
-                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u=4528d15da4babf939a10038f17427b44483dbc0f&v=4'
+                        'name': 'iosif',
+                        'url': 'https://iosif.app',
+                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u'
+                                    '=4528d15da4babf939a10038f17427b44483dbc0f&v=4 '
                     },
                     'footer': {
                         'text': 'losif',
-                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u=4528d15da4babf939a10038f17427b44483dbc0f&v=4'
+                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u'
+                                    '=4528d15da4babf939a10038f17427b44483dbc0f&v=4 '
                     },
                     'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()
                 }
@@ -101,80 +95,45 @@ async def discord_webhook(author, voice, text):
 
 @client.event
 async def on_message(message):
-    now = datetime.datetime.now()
-    date_time = now.strftime("%m/%d/%Y, %H:%M:%S")
-    global vch, vch_id, guild, vc, vol, goingtodiscon, prefix
+    global voiceClient, vol
+    date_time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
     channel = message.channel
     content = str(message.content)
-    audpname = message.author.display_name
-    auid = message.author.id
     author = message.author
 
     if is_me(message):
         return
 
-    print(
-        f"[{date_time}]{channel}({channel.id}) |  {audpname}({auid}): {content}")
-    txt = is_registerd(content)
-    if txt:
-        goingtodiscon = False
-        if vc == None:
-            if author.voice:
-                vc = await author.voice.channel.connect()
-            else:
-                vc = await vch.connect()
-        if vc.is_playing():
-            return
-        vc.play(discord.PCMVolumeTransformer(
-            original=discord.FFmpegPCMAudio(mp3_files[txt]), volume=vol))
-        while vc.is_playing():
-            await asyncio.sleep(1)
-        goingtodiscon = True
-        for i in range(300):
-            await asyncio.sleep(1)
-            if not goingtodiscon:
-                break
-            if i == 299:
-                await vc.disconnect()
-                vc = None
-                goingtodiscon = False
-
-    if content.startswith(prefix):
-        content = content[1:]
-        goingtodiscon = False
-        if vc == None:
-            if author.voice:
-                vc = await author.voice.channel.connect()
-            else:
-                vc = await vch.connect()
-        if vc.is_playing():
-            return
-        voice = ''
-        txt = content[1:]
-        if content.startswith('s'):
-            with open("symbol.json", encoding="utf-8") as f:
-                symbol = json.load(f)
-                for key, item in symbol.items():
-                    if key in txt:
-                        txt = txt.replace(key, item)
-        voice = get_voice(content[0])
-        if voice:
-            vc.play(tts.tts(txt, vol, voice))
+    print(f"[{date_time}]{channel}({channel.id}) |  {author}({author.id}): {content}")
+    index = is_registered(content)
+    if index or content.startswith(prefix):
+        source = None
+        if index:
+            source = keywords[index]
+            await discord_webhook(author, index, content)
         else:
-            return
-
-        await discord_webhook(author, voice, content[1:])
-        while vc.is_playing():
-            await asyncio.sleep(1)
-        goingtodiscon = True
+            voice = get_voice(content[1:2])
+            if voice:
+                source = tts.tts(content[2:], voice)
+                await discord_webhook(author, voice, content[2:])
+        if voiceClient is None:
+            if author.voice:
+                voiceClient = await author.voice.channel.connect()
+            else:
+                await channel.send('연결먼저 ㄱ', delete_after=5);
+        while voiceClient.is_playing():
+            await asyncio.sleep(0.1)
+        if source is not None:
+            voiceClient.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(source), volume=vol))
+        while voiceClient.is_playing():
+            await asyncio.sleep(0.1)
         for i in range(300):
             await asyncio.sleep(1)
-            if not goingtodiscon:
+            if voiceClient.is_playing():
                 break
             if i == 299:
-                await vc.disconnect()
-                vc = None
-                goingtodiscon = False
+                await voiceClient.disconnect()
+                voiceClient = None
 
     if content.startswith('vol'):
         arg = content[3:].replace(' ', '')
@@ -183,32 +142,21 @@ async def on_message(message):
                 vol = int(arg) / 100
         embed = discord.Embed(title="**Volume**",
                               description=f'{int(vol * 100)}%', color=0xff2f00)
-        sent = await channel.send(embed=embed)
-        await asyncio.sleep(30)
-        await sent.delete()
-
-    if content.startswith('pre'):
-        prefix = content[3:].replace(' ', '')
+        await channel.send(embed=embed, delete_after=5)
 
     if content.startswith('disconnect'):
-        if vc:
-            await vc.disconnect()
-            vc = None
-            goingtodiscon = False
-
+        if voiceClient:
+            await voiceClient.disconnect()
+            voiceClient = None
     return
 
 
 @client.event
 async def on_ready():
-    global guild, guild_id, vch, vch_id, vc
-    guild = client.get_guild(guild_id)
-    vch = guild.get_channel(vch_id)
+    global voiceClient
     print('\n\n\n\nLogged in as')
     print(f"{client.user.name}({client.user.id})")
     print('------------------------------------------------------------')
-    print('Server Info')
-    print(f"{guild.name}({guild.id})")
-    print('------------------------------------------------------------')
+
 
 client.run(os.getenv('TOKEN'))

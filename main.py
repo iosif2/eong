@@ -11,12 +11,10 @@ from discord_slash import SlashCommand
 import xmltodict
 
 load_dotenv()
-
 client = discord.Client()
 slash = SlashCommand(client, sync_commands=True)
-voice_clients = {}
 latest_covid_data = {}
-vol = 0.4
+vol = 0.8
 prefix = ';'
 keywords = {
     '^오^': 'teemo.mp3',
@@ -123,8 +121,6 @@ async def on_message(message):
     channel = message.channel
     content = str(message.content)
     author = message.author
-    guild_id = str(message.guild.id) if message.guild else None
-    voice_client = voice_clients.get(guild_id) if guild_id else None
 
     if is_me(message):
         return
@@ -132,9 +128,10 @@ async def on_message(message):
     print(f"[{date_time}]{channel}({channel.id}) |  {author}({author.id}): {content}")
     index = is_registered(content)
     if index or content.startswith(prefix):
+        voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         source = None
         if index:
-            source = keywords[index]
+            source = 'mp3_files/' + keywords[index]
             await discord_webhook(author, index, content)
         else:
             voice = get_voice(content[1:2])
@@ -143,23 +140,13 @@ async def on_message(message):
                 await discord_webhook(author, voice, content[2:])
         if voice_client is None:
             if author.voice:
-                voice_clients[guild_id] = await author.voice.channel.connect()
-                voice_client = voice_clients.get(guild_id)
+                voice_client = await author.voice.channel.connect(reconnect=True)
             else:
                 await channel.send('연결먼저 ㄱ', delete_after=5)
         while voice_client.is_playing():
             await asyncio.sleep(0.1)
         if source is not None:
             voice_client.play(discord.PCMVolumeTransformer(original=discord.FFmpegPCMAudio(source), volume=vol))
-        while voice_client.is_playing():
-            await asyncio.sleep(0.1)
-        for i in range(300):
-            await asyncio.sleep(1)
-            if voice_client.is_playing():
-                break
-            if i == 299:
-                await voice_client.disconnect()
-                voice_clients.pop(guild_id)
 
     if content.startswith('vol'):
         arg = content[3:].replace(' ', '')
@@ -171,9 +158,9 @@ async def on_message(message):
         await channel.send(embed=embed, delete_after=5)
 
     if content.startswith('dc'):
+        voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         if voice_client:
             await voice_client.disconnect()
-            voice_clients.pop(guild_id)
     return
 
 
@@ -187,7 +174,7 @@ async def on_ready():
 @slash.slash(name="covid", guild_ids=guild_ids, description='COVID-19')
 async def _covid(ctx):
     await update_covid_new_cases_count()
-    await ctx.send(f"신규 확진자 {latest_covid_data['new_cases_count']}명 [{latest_covid_data['date']}]")
+    await ctx.send(f"신규 확진자 {latest_covid_data['new_cases_count']}명 [{latest_covid_data['date']} 0시 기준]")
 
 
 client.run(os.getenv('TOKEN'))

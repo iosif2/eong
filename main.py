@@ -143,6 +143,11 @@ async def on_message(message):
                 voice_client = await author.voice.channel.connect(reconnect=True)
             else:
                 await channel.send('연결먼저 ㄱ', delete_after=5)
+        else:
+            if author.voice:
+                await voice_client.move_to(author.voice.channel)
+            else:
+                await channel.send('연결먼저 ㄱ', delete_after=5)
         while voice_client.is_playing():
             await asyncio.sleep(0.1)
         if source is not None:

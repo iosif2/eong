@@ -31,7 +31,10 @@ keywords = {
     '안물': 'anmul.mp3'
 }
 
+default_voice = 't'
+
 voices = {
+    ' ': None,
     't': 'Takumi',
     'm': 'Matthew',
     'f': 'Filiz',
@@ -58,7 +61,12 @@ def is_registered(t):
 
 
 def get_voice(initial):
+    global default_voice
     if initial in voices.keys():
+        if initial == ' ':
+            if default_voice not in voices.keys():
+                default_voice = 't'
+            return voices[default_voice]
         return voices[initial]
     else:
         return False
@@ -116,7 +124,7 @@ async def update_covid_new_cases_count():
 
 @client.event
 async def on_message(message):
-    global vol
+    global vol, default_voice
     date_time = datetime.datetime.now().strftime("%m/%d/%Y, %H:%M:%S")
     channel = message.channel
     content = str(message.content)
@@ -141,13 +149,9 @@ async def on_message(message):
         if voice_client is None:
             if author.voice:
                 voice_client = await author.voice.channel.connect(reconnect=True)
-            else:
-                await channel.send('연결먼저 ㄱ', delete_after=5)
         else:
             if author.voice:
                 await voice_client.move_to(author.voice.channel)
-            else:
-                await channel.send('연결먼저 ㄱ', delete_after=5)
         while voice_client.is_playing():
             await asyncio.sleep(0.1)
         if source is not None:
@@ -166,6 +170,10 @@ async def on_message(message):
         voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         if voice_client:
             await voice_client.disconnect()
+    if content.startswith('set default to '):
+        arg = content[14:].replace(' ', '')
+        default_voice = arg
+
     return
 
 

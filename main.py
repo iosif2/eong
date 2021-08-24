@@ -28,7 +28,8 @@ keywords = {
     'ㅇㅈㅇㅈㅎㄴ': 'dizzy.mp3',
     '🖕': 'fy.mp3',
     'ㅃ!': 'bye.mp3',
-    '안물': 'anmul.mp3'
+    '안물': 'anmul.mp3',
+    '애옹': 'meow.mp3'
 }
 
 default_voice = 't'

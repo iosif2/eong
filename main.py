@@ -27,9 +27,11 @@ keywords = {
     'muyaho': 'myh.mp3',
     'ㅇㅈㅇㅈㅎㄴ': 'dizzy.mp3',
     '🖕': 'fy.mp3',
-    'ㅃ!': 'bye.mp3',
+    'ㅃ!': 'byebye.mp3',
+    'ㅂ!' : 'bye.mp3',
     '안물': 'anmul.mp3',
-    '애옹': 'meow.mp3'
+    '애옹': 'meow.mp3',
+    '음' : 'wdis.mp3'
 }
 
 default_voice = 't'
@@ -135,13 +137,13 @@ async def on_message(message):
         return
 
     print(f"[{date_time}]{channel}({channel.id}) |  {author}({author.id}): {content}")
-    index = is_registered(content)
-    if index or content.startswith(prefix):
+    key = is_registered(content)
+    if key or content.startswith(prefix):
         voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         source = None
-        if index:
-            source = 'mp3_files/' + keywords[index]
-            await discord_webhook(author, index, content)
+        if key:
+            source = 'mp3_files/' + keywords[key]
+            await discord_webhook(author, key, content)
         else:
             voice = get_voice(content[1:2])
             if voice:

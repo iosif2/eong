@@ -125,7 +125,7 @@ async def on_message(message):
             voice = get_voice(content[1:2])
             if voice:
                 source = tts.tts(content[2:], voice)
-                logger.info(f'author : {author}, voice : {voice}, text : {content[2:]}')
+                logger.info(f'[TTS] author : {author}, voice : {voice}, text : {content[2:]}')
         if voice_client is None:
             if author.voice:
                 voice_client = await author.voice.channel.connect(reconnect=True)
@@ -145,11 +145,12 @@ async def on_message(message):
         embed = discord.Embed(title="**Volume**",
                               description=f'{int(vol * 100)}%', color=0xff2f00)
         await channel.send(embed=embed, delete_after=5)
+        logger.info(f'[Command] Setting volume to {int(vol * 100)}%, Command issuer : {author}')
 
     if content.startswith('dc'):
         voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         if voice_client:
-            logger.info(f'Disconnecting from {voice_client.channel}, Command issuer : {author}')
+            logger.info(f'[Command] Disconnecting from {voice_client.channel}, Command issuer : {author}')
             await voice_client.disconnect()
     return
 

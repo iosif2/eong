@@ -9,12 +9,22 @@ import os
 from dotenv import load_dotenv
 from discord_slash import SlashCommand
 import xmltodict
+import logging
+
+Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+
+logging.basicConfig(filename = "ggtts.log",
+                    filemode = "w",
+                    format = Log_Format, 
+                    level = logging.INFO)
+
+logger = logging.getLogger()
 
 load_dotenv()
 client = discord.Client()
 slash = SlashCommand(client, sync_commands=True)
 latest_covid_data = {}
-vol = 0.8
+vol = 1
 prefix = ';'
 keywords = {
     '^오^': 'teemo.mp3',
@@ -75,39 +85,6 @@ def get_voice(initial):
         return False
 
 
-async def discord_webhook(author, voice, text):
-    fields = [{'name': 'User', 'value': author.mention, 'inline': True}, {
-        'name': voice, 'value': text, 'inline': True}]
-    requests.post(
-        os.getenv('DISCORD_WEBHOOK_URL'),
-        data=json.dumps({
-            'content': '',
-            'embeds': [
-                {
-                    'title': 'TTS log',
-                    'url': 'https://github.com/pushedq/GGTTS',
-                    'color': 5439232,
-                    'fields': fields,
-                    'author': {
-                        'name': 'iosif',
-                        'url': 'https://iosif.app',
-                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u'
-                                    '=4528d15da4babf939a10038f17427b44483dbc0f&v=4 '
-                    },
-                    'footer': {
-                        'text': 'losif',
-                        'icon_url': 'https://avatars1.githubusercontent.com/u/54474221?s=460&u'
-                                    '=4528d15da4babf939a10038f17427b44483dbc0f&v=4 '
-                    },
-                    'timestamp': datetime.datetime.now(datetime.timezone.utc).isoformat()
-                }
-            ]
-
-        }),
-        headers={'Content-Type': 'application/json; charset=utf-8'}
-    )
-
-
 async def update_covid_new_cases_count():
     today = datetime.datetime.today()
     day_before_yesterday = datetime.datetime.today() - datetime.timedelta(2)
@@ -143,12 +120,12 @@ async def on_message(message):
         source = None
         if key:
             source = 'mp3_files/' + keywords[key]
-            await discord_webhook(author, key, content)
+            logger.info(f'author : {author}, voice : {key}, text : {content}')
         else:
             voice = get_voice(content[1:2])
             if voice:
                 source = tts.tts(content[2:], voice)
-                await discord_webhook(author, voice, content[2:])
+                logger.info(f'author : {author}, voice : {voice}, text : {content[2:]}')
         if voice_client is None:
             if author.voice:
                 voice_client = await author.voice.channel.connect(reconnect=True)
@@ -172,11 +149,8 @@ async def on_message(message):
     if content.startswith('dc'):
         voice_client = discord.utils.get(client.voice_clients, guild=message.guild)
         if voice_client:
+            logger.info(f'Disconnecting from {voice_client.channel}, Command issuer : {author}')
             await voice_client.disconnect()
-    if content.startswith('set default to '):
-        arg = content[14:].replace(' ', '')
-        default_voice = arg
-
     return
 
 

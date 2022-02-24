@@ -3,8 +3,6 @@ from botocore.exceptions import BotoCoreError, ClientError
 from contextlib import closing
 import os
 from tempfile import gettempdir
-import json
-import discord
 from dotenv import load_dotenv
 
 load_dotenv()

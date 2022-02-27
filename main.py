@@ -1,9 +1,8 @@
 #!venv/bin/python
-from time import time
 import requests
 import tts
 import nextcord
-from nextcord.ui import View
+from nextcord.ext import tasks
 import asyncio
 import json
 import datetime
@@ -11,6 +10,8 @@ import os
 from dotenv import load_dotenv
 import xmltodict
 import logging
+from eyc import EYCCog, EyesYChick
+from activity import ActivityCog
 
 Log_Format = "%(levelname)s %(asctime)s - %(message)s"
 
@@ -154,12 +155,6 @@ async def on_message(message):
     return
 
 
-@client.event
-async def on_ready():
-    print('\n\n\n\nLogged in as')
-    print(f'{client.user.name}({client.user.id})')
-    print('------------------------------------------------------------')
-
 @client.slash_command('covid', guild_ids=guild_ids, description='코로나 신규 확진자 수')
 async def _covid(interaction: nextcord.Interaction):
     await update_covid_new_cases_count()
@@ -172,29 +167,18 @@ async def _clear(interaction: nextcord.Interaction):
     deleted = await interaction.channel.purge(limit=100, check=is_me)
     await interaction.send(f'{len(deleted)}', delete_after=5)
 
-class yesorno(View):
-    def __init__(self):
-        super().__init__(timeout=0)
-        self.value = None
-        
-    @nextcord.ui.button(label='Yes', style=nextcord.ButtonStyle.success)
-    async def yes(self, button : nextcord.ui.Button, interaction : nextcord.Interaction):
-        await interaction.send(f'Yes {interaction.user.mention}')
-        await interaction.delete_original_message()
+@tasks.loop(seconds=3)
+async def counter():
+    await client.change_presence(status=nextcord.Status.do_not_disturb, activity=nextcord.Game(f"👀 {client.eyc.count_eyes}  🐥 {client.eyc.count_chick}"))
+
+@client.event
+async def on_ready():
+    print('\n\n\n\nLogged in as')
+    print(f'{client.user.name}({client.user.id})')
+    print('------------------------------------------------------------')
+    client.eyc = EyesYChick()
+    counter.start()
     
-    @nextcord.ui.button(label='No', style=nextcord.ButtonStyle.danger)
-    async def no(self, button : nextcord.ui.Button, interaction : nextcord.Interaction):
-        await interaction.send(f'No {interaction.user.mention}')
-        await interaction.delete_original_message()
-        
-@client.slash_command("button", guild_ids=guild_ids, description='test')
-async def _button(interaction: nextcord.Interaction):
-    view = yesorno()
-    await interaction.send(view=view)
-    await view.wait()
-
-
-
-
-
+client.add_cog(EYCCog(client=client))
+client.add_cog(ActivityCog(client=client))
 client.run(os.getenv('TOKEN'))

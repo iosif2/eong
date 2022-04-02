@@ -42,7 +42,8 @@ keywords = {
     'ㅂ!' : 'bye.mp3',
     '안물': 'anmul.mp3',
     '애옹': 'meow.mp3',
-    '음?' : 'wdis.mp3'
+    '음?' : 'wdis.mp3',
+    '대치동' : 'daechi.mp3'
 }
 
 default_voice = 't'

@@ -19,7 +19,10 @@ logging.basicConfig(filename = "eong.log",
                     filemode = "a",
                     format = Log_Format, 
                     level = logging.INFO)
-
+SERVER_URL = 'https://iosif.app'
+ENDPOINTS = {
+    'FILES': '/files'
+}
 logger = logging.getLogger()
 
 load_dotenv()
@@ -28,22 +31,22 @@ latest_covid_data = {}
 vol = 1
 prefix = ';'
 keywords = {
-    '^오^': 'teemo.mp3',
-    '비둘기': 'pigeon.mp3',
-    '네이스': 'nayce.mp3',
-    '기모링': 'gimoring.mp3',
-    '빡빡이': 'bald.mp3',
-    '무야호': 'muyaho.mp3',
-    '시옹포포': 'sop.mp3',
-    'muyaho': 'myh.mp3',
-    'ㅇㅈㅇㅈㅎㄴ': 'dizzy.mp3',
-    '🖕': 'fy.mp3',
-    'ㅃ!': 'byebye.mp3',
-    'ㅂ!' : 'bye.mp3',
-    '안물': 'anmul.mp3',
-    '애옹': 'meow.mp3',
-    '음?' : 'wdis.mp3',
-    '대치동' : 'daechi.mp3'
+    '^오^': '/teemo.mp3',
+    '비둘기': '/pigeon.mp3',
+    '네이스': '/nayce.mp3',
+    '기모링': '/gimoring.mp3',
+    '빡빡이': '/bald.mp3',
+    '무야호': '/muyaho.mp3',
+    '시옹포포': '/sop.mp3',
+    'muyaho': '/myh.mp3',
+    'ㅇㅈㅇㅈㅎㄴ': '/dizzy.mp3',
+    '🖕': '/fy.mp3',
+    'ㅃ!': '/byebye.mp3',
+    'ㅂ!' : '/bye.mp3',
+    '안물': '/anmul.mp3',
+    '애옹': '/meow.mp3',
+    '음?' : '/wdis.mp3',
+    '대치동' : '/daechi.mp3'
 }
 
 default_voice = 't'
@@ -113,14 +116,15 @@ async def on_message(message):
 
     if is_me(message):
         return
-
+    
     print(f"[{date_time}]{channel}({channel.id}) |  {author}({author.id}): {content}")
     key = is_registered(content)
+    
     if key or content.startswith(prefix):
         voice_client = nextcord.utils.get(client.voice_clients, guild=message.guild)
         source = None
         if key:
-            source = 'mp3_files/' + keywords[key]
+            source = SERVER_URL + ENDPOINTS['FILES'] + keywords[key]
             logger.info(f'author : {author}, voice : {key}, text : {content}')
         else:
             voice = get_voice(content[1:2])

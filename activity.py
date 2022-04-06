@@ -1,16 +1,13 @@
 import nextcord
-import json
-import os
 from nextcord.application_command import ClientCog, slash_command, SlashOption
 from nextcord.ui import View, Button
-
-guild_ids = json.loads(os.getenv('guild_ids'))
+from config import Config
 
 class ActivityCog(ClientCog):
     def __init__(self, client: nextcord.Client):
         self.client = client
     
-    @slash_command(name='activity', description='Activity Invites', guild_ids=guild_ids)
+    @slash_command(name='activity', description='Activity Invites', guild_ids=Config.guild_ids)
     async def activities(self, interaction: nextcord.Interaction, channel: 
         nextcord.abc.GuildChannel = SlashOption(channel_types=[nextcord.ChannelType.voice]), 
         activity: str = SlashOption(choices={

@@ -41,7 +41,7 @@ class EYCCog(ClientCog):
     def is_me(self, m):
         return m.author == self.client.user
     
-    @slash_command("button", guild_ids=guild_ids, description='test')
+    @slash_command("button", guild_ids=guild_ids, description='buttons')
     async def _button(self, interaction: nextcord.Interaction):
         view = EYC_View(self.client)
         await interaction.send(view=view)

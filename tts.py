@@ -13,8 +13,8 @@ def tts(txt, speaker):
                       region_name=os.getenv('REGION'))
     polly = session.client("polly")
     try:
-        response = polly.synthesize_speech(Text=txt, OutputFormat="mp3",
-                                           VoiceId=speaker)
+        response = polly.synthesize_speech(
+            Text=txt, OutputFormat="mp3", VoiceId=speaker)
     except (BotoCoreError, ClientError) as error:
         print(error)
         return None

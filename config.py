@@ -1,18 +1,19 @@
-import json 
+import json
 import os
 import logging
 from dotenv import load_dotenv
 load_dotenv()
 
+
 class Config:
     guild_ids = json.loads(os.getenv('guild_ids'))
     serviceKey = os.getenv('serviceKey')
-    
+
     SERVER_URL = 'https://iosif.app'
     ENDPOINTS = {
         'FILES': '/files'
     }
-    
+
     keywords = {
         '^오^': '/teemo.mp3',
         '비둘기': '/pigeon.mp3',
@@ -25,13 +26,13 @@ class Config:
         'ㅇㅈㅇㅈㅎㄴ': '/dizzy.mp3',
         '🖕': '/fy.mp3',
         'ㅃ!': '/byebye.mp3',
-        'ㅂ!' : '/bye.mp3',
+        'ㅂ!': '/bye.mp3',
         '안물': '/anmul.mp3',
         '애옹': '/meow.mp3',
-        '음?' : '/wdis.mp3',
-        '대치동' : '/daechi.mp3'
+        '음?': '/wdis.mp3',
+        '대치동': '/daechi.mp3'
     }
-    
+
     voices = {
         't': 'Takumi',
         'm': 'Matthew',
@@ -42,18 +43,18 @@ class Config:
         's': 'Seoyeon',
         'р': 'Tatyana'
     }
-        
+
     prefix = ';'
 
-    vol = 1
-    
-    
-    
+    volume = 0.05
+
+    status_messages = ['😼', 'eong', '😺', '😻', '😾', '🙀', '🐈', '😹', '애옹']
+
     def getLogger():
         Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename = "eong.log",
-                    filemode = "a",
-                    format = Log_Format, 
-                    level = logging.INFO)
+        logging.basicConfig(filename="eong.log",
+                            filemode="a",
+                            format=Log_Format,
+                            level=logging.INFO)
 
         return logging.getLogger()

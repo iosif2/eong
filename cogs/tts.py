@@ -25,7 +25,6 @@ def tts(txt, speaker):
         response = polly.synthesize_speech(
             Text=txt, OutputFormat="mp3", VoiceId=speaker)
     except (BotoCoreError, ClientError) as error:
-        print(error)
         return None
     if "AudioStream" in response:
         with closing(response["AudioStream"]) as stream:
@@ -34,10 +33,8 @@ def tts(txt, speaker):
                 with open(output, "wb") as file:
                     file.write(stream.read())
             except IOError as error:
-                print(error)
                 return None
     else:
-        print("Could not stream audio")
         return None
     return output
 
@@ -119,7 +116,7 @@ class TTSCog(commands.Cog):
                 await asyncio.sleep(0.1)
             voice_client.play(nextcord.PCMVolumeTransformer(
                 original=nextcord.FFmpegPCMAudio(source), volume=Config.volume_tts))
-    
+
     @user_command(name='Follow', guild_ids=Config.guild_ids)
     async def _join_user_command(self, interaction: Interaction, member: Member):
         await interaction.channel.trigger_typing()
@@ -134,13 +131,13 @@ class TTSCog(commands.Cog):
             else:
                 try:
                     await member.voice.channel.connect()
-                    
+
                 except asyncio.TimeoutError:
                     return await utils.send_ephemeral_message(interaction=interaction, content='😕 Error')
                 await utils.send_ephemeral_message(interaction=interaction, content=f'🙋‍♂️ Connected to {member.voice.channel}')
         else:
-            await utils.send_ephemeral_message(interaction=interaction, content=f'😕 User is not connected to voice channel.')        
-    
+            await utils.send_ephemeral_message(interaction=interaction, content=f'😕 User is not connected to voice channel.')
+
     @slash_command("clm", guild_ids=Config.guild_ids, description='Clear messages')
     async def _clm(self, interaction: Interaction):
         try:
@@ -148,7 +145,7 @@ class TTSCog(commands.Cog):
         except Exception as e:
             return await interaction.send(f'🤒```\n{e}\n```', delete_after=5)
         await interaction.send(f'{len(deleted)}', delete_after=5)
-    
+
     @slash_command(name='volume', description='Get/Set volume', guild_ids=Config.guild_ids)
     async def _volume(self, interaction: Interaction, volume: int = SlashOption(description="Volume", required=False, min_value=0, max_value=100)):
         await interaction.channel.trigger_typing()
@@ -172,10 +169,11 @@ class TTSCog(commands.Cog):
     @message_command(name='Seoyeon', guild_ids=Config.guild_ids)
     async def _read_seoyeon(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Seoyeon', message)
-    
+
     @message_command(name='Enrique', guild_ids=Config.guild_ids)
     async def _read_enrique(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Enrique', message)
+
 
 def setup(bot):
     bot.add_cog(TTSCog(bot))

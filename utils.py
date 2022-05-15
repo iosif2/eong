@@ -1,9 +1,6 @@
-import aiohttp
 import asyncio
 import threading
-import nextcord
 
-from config import Config
 
 class ThreadSafeCacheable:
     def __init__(self, co):
@@ -23,39 +20,13 @@ class ThreadSafeCacheable:
             else:
                 yield from asyncio.sleep(0.005)
 
+
 def cacheable(f):
     def wrapped(*args, **kwargs):
         r = f(*args, **kwargs)
         return ThreadSafeCacheable(r)
     return wrapped
 
-
-async def send_ephemeral_message(interaction: nextcord.Interaction, content: str, embeds: list = None):
-    _embeds = []
-    if embeds:
-        _embeds = [_.to_dict() for _ in embeds]
-    data = {
-        'type': 4,
-        'data': {
-            'content': content,
-            'embeds': _embeds,
-            'flags': 1 << 6,
-        }
-    }
-    async with aiohttp.ClientSession() as session:
-        await session.post(Config.DISCORD_API_V9 + f'/interactions/{interaction.id}/{interaction.token}/callback', json=data)
-
-
-async def edit_message(interaction: nextcord.Interaction, content: str, embeds: list = None):
-    _embeds = []
-    if embeds:
-        _embeds = [_.to_dict() for _ in embeds]
-    data = {
-        'content': content,
-        'embeds': _embeds
-    }
-    async with aiohttp.ClientSession() as session:
-        await session.patch(Config.DISCORD_API_V9 + f'/interactions/{interaction.application_id}/{interaction.token}/messages/@original', json=data)
 
 def divide_messages_for_embed(list: list):
     msgs = []
@@ -64,8 +35,22 @@ def divide_messages_for_embed(list: list):
     for msg in list:
         if type(msg) is not str:
             continue
-        if len(msgs[embed_count] + msg) > 3000:
+        if len(msgs[embed_count] + msg) > 3500:
             embed_count += 1
             msgs.append('')
         msgs[embed_count] += msg + "\n"
     return msgs
+
+
+def duration_to_string(duration: int):
+    seconds = duration % (24 * 3600)
+    hour = seconds // 3600
+    seconds %= 3600
+    minutes = seconds // 60
+    seconds %= 60
+    if hour > 0:
+        return "%dh %02dm %02ds" % (hour, minutes, seconds)
+    else:
+        return "%02dm %02ds" % (minutes, seconds)
+
+def head(async_iterator): return async_iterator.__anext__()

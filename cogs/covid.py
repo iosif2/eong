@@ -50,7 +50,7 @@ class CovidCog(commands.Cog):
         ), timestamp=datetime.datetime.strptime(latest_covid_data['date'], '%Y%m%d'))
         embed.add_field(
             name=f'{latest_covid_data["new_cases_count"]:,} 명', value='\u200B')
-        await interaction.send(embed=embed)
+        await interaction.send(embeds=[embed])
 
 
 def setup(bot: commands.Bot):

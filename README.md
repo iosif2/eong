@@ -1,18 +1,26 @@
 # eong
-eong is a Python Discord Bot
+[![python](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/)
+[![GitHub](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 
-## Required Files
-To Deploy eong you have to set the .env file.
+# Intro
+eong is discord bot made by iosif
 
-### .env
+### Required environment variables
+```json
+"TOKEN": "Discord bot token for main bot"
+"TOKEN": "Discord bot token for music bot"
+"AWS_ID": "AWS ID for AWS Amazon polly"
+"AWS_KEY": "AWS Key for AWS Amazon polly"
+"REGION": "AWS Region"
+"guild_ids": "Server IDs for slash commands"
+"serviceKey": "serviceKey for OPENAPI-COVID_19" [deprecated]
 ```
-TOKEN = "TOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKENTOKEN" # Discord bot token
-AWS_ID = "IDIDIDIDIDIDIDIDIDID" # AWS ID for AWS Amazon polly
-AWS_KEY = "KEYKEYKEYKEYKEYKEYKEYKEYKEYKEYKEYKEYKEYK" # AWS Key for AWS Amazon polly
-REGION = "re-gionregio-n" # AWS Region
-serviceKey = "serviceKeyserviceKeyserviceKeyserviceKeyserviceKeyserviceKeyserviceKeyserviceKeyserviceKeyserviceKey" # serviceKey for OPENAPI-COVID_19
-guild_ids = "[000000000000000000, 000000000000000000]" # Server IDs for slash commands
-```
 
-## License
-[MIT](https://choosealicense.com/licenses/mit/)
+### How to
+```bash
+python3 -m venv venv # make new python virtualenv
+source venv/bin/activate # for mac&linux
+# venv/Scripts/activate.cmd # for Windows
+pip install -r requirements.txt # install required python packages
+python main.py # run
+```

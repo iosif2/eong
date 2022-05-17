@@ -28,12 +28,12 @@ def cacheable(f):
     return wrapped
 
 
-def divide_messages_for_embed(list: list):
+def divide_messages_for_embed(messages: list):
     msgs = []
     embed_count = 0
     msgs.append('')
-    for msg in list:
-        if type(msg) is not str:
+    for msg in messages:
+        if not isinstance(msg, str):
             continue
         if len(msgs[embed_count] + msg) > 3500:
             embed_count += 1
@@ -52,5 +52,6 @@ def duration_to_string(duration: int):
         return "%dh %02dm %02ds" % (hour, minutes, seconds)
     else:
         return "%02dm %02ds" % (minutes, seconds)
+
 
 def head(async_iterator): return async_iterator.__anext__()

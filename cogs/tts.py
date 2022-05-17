@@ -11,10 +11,10 @@ from nextcord.ext import commands
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 
-
+import config
 from config import Config
 
-logger = Config.getLogger()
+logger = config.getLogger()
 
 
 def tts(txt, speaker):
@@ -24,7 +24,7 @@ def tts(txt, speaker):
     try:
         response = polly.synthesize_speech(
             Text=txt, OutputFormat="mp3", VoiceId=speaker)
-    except (BotoCoreError, ClientError) as error:
+    except (BotoCoreError, ClientError):
         return None
     if "AudioStream" in response:
         with closing(response["AudioStream"]) as stream:
@@ -32,7 +32,7 @@ def tts(txt, speaker):
             try:
                 with open(output, "wb") as file:
                     file.write(stream.read())
-            except IOError as error:
+            except IOError:
                 return None
     else:
         return None
@@ -41,15 +41,14 @@ def tts(txt, speaker):
 
 def get_keyword_info(t):
     for key, value in Config.keywords.items():
-        if key in t:
-            if type(value) == list:
+        if key in t: 
+            if isinstance(list, value):
                 return random.choice(value)
             return value
     return False
 
 
 def get_voice(initial):
-    global default_voice
     if initial in Config.voices.keys():
         return Config.voices[initial]
     else:
@@ -136,7 +135,7 @@ class TTSCog(commands.Cog):
                     return await utils.send_ephemeral_message(interaction=interaction, content='😕 Error')
                 await utils.send_ephemeral_message(interaction=interaction, content=f'🙋‍♂️ Connected to {member.voice.channel}')
         else:
-            await utils.send_ephemeral_message(interaction=interaction, content=f'😕 User is not connected to voice channel.')
+            await utils.send_ephemeral_message(interaction=interaction, content='😕 User is not connected to voice channel.')
 
     @slash_command("clm", guild_ids=Config.guild_ids, description='Clear messages')
     async def _clm(self, interaction: Interaction):

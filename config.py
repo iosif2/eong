@@ -13,13 +13,13 @@ class Config:
     region_name = os.getenv('REGION')
 
     SERVER_URL = 'https://iosif.app'
-    
+
     ENDPOINTS = {
         'FILES': '/files'
     }
-    
+
     DISCORD_API_V9 = 'https://discord.com/api/v9'
-    
+
     keywords = {
         '^오^': '/teemo.mp3',
         '비둘기': '/pigeon.mp3',
@@ -56,11 +56,12 @@ class Config:
 
     status_messages = ['😼', 'eong', '😺', '😻', '😾', '🙀', '🐈', '😹', '애옹']
 
-    def getLogger():
-        Log_Format = "%(levelname)s %(asctime)s - %(message)s"
-        logging.basicConfig(filename="eong.log",
-                            filemode="w",
-                            format=Log_Format,
-                            level=logging.INFO)
 
-        return logging.getLogger()
+def getLogger():
+    Log_Format = "%(levelname)s %(asctime)s - %(message)s"
+    logging.basicConfig(filename="eong.log",
+                        filemode="w",
+                        format=Log_Format,
+                        level=logging.INFO)
+
+    return logging.getLogger()

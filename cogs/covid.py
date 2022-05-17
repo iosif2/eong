@@ -54,6 +54,5 @@ class CovidCog(commands.Cog):
 
 
 def setup(bot: commands.Bot):
+    pass
     # bot.add_cog(CovidCog(bot=bot)) # Uncomment to enable the cog
-    pass 
-

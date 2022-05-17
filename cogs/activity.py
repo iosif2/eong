@@ -8,7 +8,7 @@ class ActivityCog(commands.Cog):
     def __init__(self, bot: commands.Bot):
         self.client = bot
 
-    @nextcord.slash_command(name='activity', description='Activity Invites', guild_ids=Config.guild_ids)
+    @nextcord.slash_command(name='activity', description='Activity Invites')
     async def activities(self, interaction: nextcord.Interaction, channel:
                          nextcord.abc.GuildChannel = nextcord.SlashOption(
                              channel_types=[nextcord.ChannelType.voice]),

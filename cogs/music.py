@@ -1,3 +1,4 @@
+from multiprocessing.sharedctypes import Value
 import random
 import itertools
 import asyncio
@@ -11,11 +12,12 @@ from nextcord.ext import commands
 import youtube_dl
 from youtube_dl import YoutubeDL
 
+import config
 from config import Config
 import utils
 
 youtube_dl.utils.bug_reports_message = lambda: ''
-logger = Config.getLogger()
+logger = config.getLogger()
 
 
 ydl_opts = {
@@ -58,9 +60,9 @@ class YTDLSource(nextcord.PCMVolumeTransformer):
     @utils.cacheable
     async def create_source(cls, member: nextcord.Member, search: str, *, bot: commands.Bot, download=False):
         loop = bot.loop or asyncio.get_event_loop()
-        
+
         to_run = partial(ytdl.extract_info, url=search, download=download)
-        
+
         data = await loop.run_in_executor(None, to_run)
 
         if 'entries' in data:
@@ -116,16 +118,17 @@ class MusicPlayer:
         try:
             while True:
                 await asyncio.sleep(60)
-                logger.info(f'message_updater(): Updating player message for {self._guild.name}')
+                logger.info(
+                    f'message_updater(): Updating player message for {self._guild.name}')
                 await self.update_player_msg()
         except asyncio.CancelledError:
-            logger.info(f'message_updater(): Cancelled message updater for {self._guild.name}')
+            logger.info(
+                f'message_updater(): Cancelled message updater for {self._guild.name}')
             if self._channel.type == nextcord.ChannelType.public_thread:
                 await self._channel.delete()
             else:
                 await self._msg.delete()
             return
-            
 
     async def player_loop(self):
         await self.client.wait_until_ready()
@@ -134,7 +137,7 @@ class MusicPlayer:
             try:
                 async with timeout(300):
                     embed = nextcord.Embed(
-                        title='🎧 Player', description=f'**Idling**', color=nextcord.Color.green())
+                        title='🎧 Player', description='**Idling**', color=nextcord.Color.green())
                     await self.set_embed_player(embed)
                     source = await self.queue.get()
             except asyncio.TimeoutError:
@@ -143,7 +146,7 @@ class MusicPlayer:
                 try:
                     source = await YTDLSource.regather_stream(source, loop=self.client.loop)
                 except Exception:
-                    await self._channel.send(f'🤕 Error while processing', delete_after=5)
+                    await self._channel.send('🤕 Error while processing', delete_after=5)
                     continue
             source.volume = Config.volume_music
             self.current = source
@@ -188,7 +191,8 @@ class MusicPlayer:
             self._msg = await self._channel.send(embeds=embeds)
         else:
             self._msg = await self._msg.edit(embeds=embeds)
-        logger.info(f'update_player_msg(): Updated player message for {self._guild.name}')
+        logger.info(
+            f'update_player_msg(): Updated player message for {self._guild.name}')
 
     async def set_embed_player(self, embed):
         self.embed_player = embed
@@ -248,7 +252,7 @@ class MusicCog(commands.Cog):
             self.players[interaction.guild.id] = player
         return player
 
-    @slash_command("clm", guild_ids=Config.guild_ids, description='Clear messages')
+    @slash_command("clm", description='Clear messages')
     async def _clm(self, interaction: Interaction):
         try:
             player = await self.get_player(interaction=interaction)
@@ -282,7 +286,7 @@ class MusicCog(commands.Cog):
                 return
         await interaction.send(f'🙋‍♂️ Connected to {channel}', delete_after=5, ephemeral=ephemeral)
 
-    @slash_command(name='join', description='Connects to voice channel', guild_ids=Config.guild_ids)
+    @slash_command(name='join', description='Connects to voice channel')
     async def _join(
             self,
             interaction: Interaction,
@@ -291,12 +295,12 @@ class MusicCog(commands.Cog):
         await interaction.channel.trigger_typing()
         await self.join(interaction=interaction, channel=channel)
 
-    @user_command(name='Follow', guild_ids=Config.guild_ids)
+    @user_command(name='Follow')
     async def _join_user_command(self, interaction: Interaction, member: Member):
         await interaction.channel.trigger_typing()
         await self.join(interaction=interaction, member=member, ephemeral=True)
 
-    @slash_command(name='dc', description='Diconnect the voice client and Destroy the music player', guild_ids=Config.guild_ids)
+    @slash_command(name='dc', description='Diconnect the voice client and Destroy the music player')
     async def _dc(self, interaction: Interaction):
         await interaction.channel.trigger_typing()
         voice_client = interaction.guild.voice_client
@@ -328,8 +332,6 @@ class MusicCog(commands.Cog):
 
         await interaction.send(content=f'🔍 Searching... [{interaction.user.mention}] ', delete_after=5, ephemeral=ephemeral)
 
-        
-
         msg = ''
         for keyword in search.split(','):
             if keyword.isspace():
@@ -342,24 +344,24 @@ class MusicCog(commands.Cog):
             await player.queue.put(source)
             msg += f'+ Added [{source["title"]}]\n'
         msgs = utils.divide_messages_for_embed(msg.strip().split('\n'))
-        for i in range(len(msgs)):
-            if i == 0:
+        for msg in msgs:
+            if msgs.index(msg):
                 embed = nextcord.Embed(
-                    title=f'😎 Added to queue [Page({i + 1}/{len(msgs)})]', description=msgs[i], color=nextcord.Color.green())
+                    title=f'😎 Added to queue [Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.green())
             else:
                 embed = nextcord.Embed(
-                    title=f'[Page({i + 1}/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'[Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             await interaction.send(embeds=[embed], delete_after=10)
 
-    @message_command(name='Find and Play', guild_ids=Config.guild_ids)
+    @message_command(name='Find and Play')
     async def _findNplay(self, interaction: Interaction, message: Message):
         await self.play(interaction=interaction, search=message.content, ephemeral=True)
 
-    @slash_command(name='play', description='play music.', guild_ids=Config.guild_ids)
+    @slash_command(name='play', description='play music.')
     async def _play(self, interaction: Interaction, search: str = SlashOption(description='keyword or [multiple, keywords, seperated, with, comma]', required=True)):
         await self.play(interaction=interaction, search=search)
 
-    @slash_command(name='stop', description='stop player', guild_ids=Config.guild_ids)
+    @slash_command(name='stop', description='stop player')
     async def _stop(self, interaction: Interaction):
         await interaction.channel.trigger_typing()
         voice_client = interaction.guild.voice_client
@@ -375,11 +377,11 @@ class MusicCog(commands.Cog):
         player.queue._queue.clear()
         voice_client.stop()
         embed = nextcord.Embed(
-            title=f'🛑 **Stopped**', description=f'[{interaction.user.mention}]', color=nextcord.Color.yellow())
+            title='🛑 **Stopped**', description=f'[{interaction.user.mention}]', color=nextcord.Color.yellow())
         await player.set_embed_status(embed=embed, clear_after=10)
-        await interaction.send(f'🛑 **Stopped**', delete_after=2)
+        await interaction.send('🛑 **Stopped**', delete_after=2)
 
-    @slash_command(name='skip', description='Skips current music', guild_ids=Config.guild_ids)
+    @slash_command(name='skip', description='Skips current music')
     async def _skip(self, interaction: Interaction):
         await interaction.channel.trigger_typing()
         voice_client = interaction.guild.voice_client
@@ -397,7 +399,7 @@ class MusicCog(commands.Cog):
         await player.add_embed_msgs(embed, clear_after=10)
         await interaction.send("⏩ **Skip**", delete_after=2)
 
-    @slash_command(name='volume', description='Get/Set volume', guild_ids=Config.guild_ids)
+    @slash_command(name='volume', description='Get/Set volume')
     async def _volume(self, interaction: Interaction, volume: int = SlashOption(description="Volume", required=False, min_value=0, max_value=100)):
         await interaction.channel.trigger_typing()
         if not volume:
@@ -409,7 +411,7 @@ class MusicCog(commands.Cog):
             if voice_client and voice_client.is_connected():
                 voice_client.source.volume = Config.volume_music
 
-    @slash_command(name='player', description='player main command', guild_ids=Config.guild_ids)
+    @slash_command(name='player', description='player main command')
     async def _player(self, interaction: Interaction):
         pass
 
@@ -427,7 +429,7 @@ class MusicCog(commands.Cog):
         await player._channel.add_user(interaction.user)
         voice_client.pause()
         embed = nextcord.Embed(
-            title=f'⏸ **Paused**', description=f'[{interaction.user.mention}]', color=nextcord.Color.yellow())
+            title='⏸ **Paused**', description=f'[{interaction.user.mention}]', color=nextcord.Color.yellow())
         await player.set_embed_status(embed=embed)
         await interaction.send("⏸ **Paused**", delete_after=2)
 
@@ -445,7 +447,7 @@ class MusicCog(commands.Cog):
         await player.clear_embed_status()
         await interaction.send(f'⏯ **Resume** [{interaction.user.mention}]', delete_after=2)
 
-    @slash_command(name='queue', description='queue main command', guild_ids=Config.guild_ids)
+    @slash_command(name='queue', description='queue main command')
     async def _queue(self, interaction: Interaction):
         pass
 
@@ -465,13 +467,13 @@ class MusicCog(commands.Cog):
         upcoming_msgs = [f"\n__Now Playing__:\n[{voice_client.source.title}]({voice_client.source.web_url}) |  `{utils.duration_to_string(voice_client.source.duration)} Requested by:` {voice_client.source.requester.mention}\n\n__Up Next:__\n"] + [
             f"`{i + 1}.` [{upcoming[i]['title']}]({upcoming[i]['webpage_url']}) | `Requested by:` {upcoming[i]['requester'].mention}\n" for i in range(len(upcoming))] + [f"\n**{len(upcoming)} songs in queue**"]
         msgs = utils.divide_messages_for_embed(upcoming_msgs)
-        for i in range(len(msgs)):
-            if i == 0:
+        for msg in msgs:
+            if msgs.index(msg) == 0:
                 embed = nextcord.Embed(
-                    title=f'🎧 Queue for {interaction.guild.name} [Page({i + 1})/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'🎧 Queue for {interaction.guild.name} [Page({msgs.index(msg) + 1})/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             else:
                 embed = nextcord.Embed(
-                    title=f'[Page({i + 1}/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'[Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             await interaction.send(embeds=[embed], delete_after=10)
 
     @_queue.subcommand(name='remove', description='Remove music from queue')
@@ -488,7 +490,7 @@ class MusicCog(commands.Cog):
             del player.queue._queue[index-1]
             embed = nextcord.Embed(
                 title='', description=f'🗑 **Removed** [{removed["title"]}]', color=nextcord.Color.green())
-        except:
+        except Value:
             embed = nextcord.Embed(
                 title='', description=f'😿 Could not find a track for "{index}"', color=nextcord.Color.red())
         await player.add_embed_msgs(embed, clear_after=10)
@@ -521,13 +523,13 @@ class MusicCog(commands.Cog):
         upcoming_msgs = [f"\n__Now Playing__:\n[{voice_client.source.title}]({voice_client.source.web_url}) |  `{utils.duration_to_string(voice_client.source.duration)} Requested by:` {voice_client.source.requester.mention}\n\n__Up Next:__\n"] + [
             f"`{i + 1}.` [{upcoming[i]['title']}]({upcoming[i]['webpage_url']}) | `Requested by:` {upcoming[i]['requester'].mention}\n" for i in range(len(upcoming))] + [f"\n**{len(upcoming)} songs in queue**"]
         msgs = utils.divide_messages_for_embed(upcoming_msgs)
-        for i in range(len(msgs)):
-            if i == 0:
+        for msg in msgs:
+            if msgs.index(msg) == 0:
                 embed = nextcord.Embed(
-                    title=f'🔀 Shuffled {interaction.guild.name} [Page({i + 1})/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'🔀 Shuffled {interaction.guild.name} [Page({msgs.index(msg) + 1})/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             else:
                 embed = nextcord.Embed(
-                    title=f'[Page({i + 1}/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'[Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             await interaction.send(embeds=[embed], delete_after=10)
 
     @_queue.subcommand(name='save', description='Save the queue')
@@ -553,20 +555,20 @@ class MusicCog(commands.Cog):
         await player._channel.add_user(interaction.user)
         try:
             player.queue._queue.extend(self.saved_queue[name])
-        except KeyError:
+        except IndexError:
             return await sent.edit(f'😿 Could not find a queue named "{name}"', delete_after=5)
         upcoming = list(itertools.islice(player.queue._queue,
                                          0, int(len(player.queue._queue))))
         upcoming_msgs = [f"\n__Now Playing__:\n[{voice_client.source.title}]({voice_client.source.web_url}) |  `{utils.duration_to_string(voice_client.source.duration)} Requested by:` {voice_client.source.requester.mention}\n\n__Up Next:__\n"] + [
             f"`{i + 1}.` [{upcoming[i]['title']}]({upcoming[i]['webpage_url']}) | `Requested by:` {upcoming[i]['requester'].mention}\n" for i in range(len(upcoming))] + [f"\n**{len(upcoming)} songs in queue**"]
         msgs = utils.divide_messages_for_embed(upcoming_msgs)
-        for i in range(len(msgs)):
-            if i == 0:
+        for msg in msgs:
+            if msgs.index(msg) == 0:
                 embed = nextcord.Embed(
-                    title=f'🎧 Queue for {interaction.guild.name} [Page({i + 1})/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'🎧 Queue for {interaction.guild.name} [Page({i + 1})/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             else:
                 embed = nextcord.Embed(
-                    title=f'[Page({i + 1}/{len(msgs)})]', description=msgs[i], color=nextcord.Color.yellow())
+                    title=f'[Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             await interaction.send(embeds=[embed], delete_after=10)
 
     @_queue.subcommand(name='list', description='List all saved queues')

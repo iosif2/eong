@@ -2,7 +2,7 @@
 [![python](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 
-# Intro
+## Intro
 eong is discord bot made by iosif
 
 ### Required environment variables

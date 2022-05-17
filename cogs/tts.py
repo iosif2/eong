@@ -11,10 +11,10 @@ from nextcord.ext import commands
 from boto3 import Session
 from botocore.exceptions import BotoCoreError, ClientError
 
-
+import config
 from config import Config
 
-logger = Config.getLogger()
+logger = config.getLogger()
 
 
 def tts(txt, speaker):
@@ -24,7 +24,7 @@ def tts(txt, speaker):
     try:
         response = polly.synthesize_speech(
             Text=txt, OutputFormat="mp3", VoiceId=speaker)
-    except (BotoCoreError, ClientError) as error:
+    except (BotoCoreError, ClientError):
         return None
     if "AudioStream" in response:
         with closing(response["AudioStream"]) as stream:
@@ -32,7 +32,7 @@ def tts(txt, speaker):
             try:
                 with open(output, "wb") as file:
                     file.write(stream.read())
-            except IOError as error:
+            except IOError:
                 return None
     else:
         return None
@@ -42,14 +42,13 @@ def tts(txt, speaker):
 def get_keyword_info(t):
     for key, value in Config.keywords.items():
         if key in t:
-            if type(value) == list:
+            if isinstance(list, value):
                 return random.choice(value)
             return value
     return False
 
 
 def get_voice(initial):
-    global default_voice
     if initial in Config.voices.keys():
         return Config.voices[initial]
     else:
@@ -117,60 +116,19 @@ class TTSCog(commands.Cog):
             voice_client.play(nextcord.PCMVolumeTransformer(
                 original=nextcord.FFmpegPCMAudio(source), volume=Config.volume_tts))
 
-    @user_command(name='Follow', guild_ids=Config.guild_ids)
-    async def _join_user_command(self, interaction: Interaction, member: Member):
-        await interaction.channel.trigger_typing()
-        voice_client = interaction.guild.voice_client
-        if member.voice:
-            if voice_client:
-                if voice_client.channel.id == member.voice.channel.id:
-                    return await utils.send_ephemeral_message(interaction=interaction, content='😕 Already connected')
-                else:
-                    await voice_client.move_to(member.voice.channel)
-                    return await utils.send_ephemeral_message(interaction=interaction, content=f'🏃‍♀️ Moving to {member.voice.channel}')
-            else:
-                try:
-                    await member.voice.channel.connect()
-
-                except asyncio.TimeoutError:
-                    return await utils.send_ephemeral_message(interaction=interaction, content='😕 Error')
-                await utils.send_ephemeral_message(interaction=interaction, content=f'🙋‍♂️ Connected to {member.voice.channel}')
-        else:
-            await utils.send_ephemeral_message(interaction=interaction, content=f'😕 User is not connected to voice channel.')
-
-    @slash_command("clm", guild_ids=Config.guild_ids, description='Clear messages')
-    async def _clm(self, interaction: Interaction):
-        try:
-            deleted = await interaction.channel.purge(limit=100, check=lambda m: m.author == self.bot.user)
-        except Exception as e:
-            return await interaction.send(f'🤒```\n{e}\n```', delete_after=5)
-        await interaction.send(f'{len(deleted)}', delete_after=5)
-
-    @slash_command(name='volume', description='Get/Set volume', guild_ids=Config.guild_ids)
-    async def _volume(self, interaction: Interaction, volume: int = SlashOption(description="Volume", required=False, min_value=0, max_value=100)):
-        await interaction.channel.trigger_typing()
-        if not volume:
-            await interaction.send(f'Volume : **{Config.volume_tts*100} %**', delete_after=5)
-        else:
-            await interaction.send(f'Volume : {Config.volume_tts*100} % -> **{volume} %**', delete_after=5)
-            Config.volume_tts = volume / 100
-            voice_client = interaction.guild.voice_client
-            if voice_client and voice_client.is_connected():
-                voice_client.source.volume = Config.volume_tts
-
-    @message_command(name='Filiz', guild_ids=Config.guild_ids)
+    @message_command(name='Filiz')
     async def _read_filiz(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Filiz', message)
 
-    @message_command(name='Takumi', guild_ids=Config.guild_ids)
+    @message_command(name='Takumi')
     async def _read_takumi(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Takumi', message)
 
-    @message_command(name='Seoyeon', guild_ids=Config.guild_ids)
+    @message_command(name='Seoyeon')
     async def _read_seoyeon(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Seoyeon', message)
 
-    @message_command(name='Enrique', guild_ids=Config.guild_ids)
+    @message_command(name='Enrique')
     async def _read_enrique(self, interaction: Interaction, message: Message):
         await self.read_message(interaction, 'Enrique', message)
 

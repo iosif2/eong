@@ -43,7 +43,7 @@ class CovidCog(commands.Cog):
     def is_me(self, m):
         return m.author == self.bot.user
 
-    @nextcord.slash_command("covid", guild_ids=Config.guild_ids, description='covid19')
+    @nextcord.slash_command("covid", description='covid19')
     async def _covid(self, interaction: nextcord.Interaction):
         latest_covid_data = await self.covid.getData()
         embed = nextcord.Embed(title='코로나 신규 확진자', colour=nextcord.Color.yellow(
@@ -54,6 +54,5 @@ class CovidCog(commands.Cog):
 
 
 def setup(bot: commands.Bot):
+    pass
     # bot.add_cog(CovidCog(bot=bot)) # Uncomment to enable the cog
-    pass 
-

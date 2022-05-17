@@ -1,4 +1,5 @@
 # eong
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/d6d766f5a4774deba560751a22c9b6d9)](https://app.codacy.com/gh/iosif2/eong?utm_source=github.com&utm_medium=referral&utm_content=iosif2/eong&utm_campaign=Badge_Grade_Settings)
 [![python](https://img.shields.io/badge/python-3.9-blue)](https://www.python.org/)
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 

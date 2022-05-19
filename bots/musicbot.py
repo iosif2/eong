@@ -10,6 +10,7 @@ from config import Config
 class MusicBot(commands.Bot):
     def __init__(self):
         super().__init__(self)
+        self.command_prefix = '`'
         self.load_extension('cogs.music')
 
     async def on_ready(self):

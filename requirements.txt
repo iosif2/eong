@@ -5,3 +5,4 @@ boto3
 xmltodict
 python-dotenv
 youtube-dl
+async_lru

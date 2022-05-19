@@ -12,6 +12,7 @@ from .musicbot import MusicBot as Music
 class MainBot(commands.Bot):
     def __init__(self):
         super().__init__(self)
+        self.command_prefix = '`'
         for filename in os.listdir("./cogs"):
             if filename.endswith(".py"):
                 if 'music' in filename:

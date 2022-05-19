@@ -1,32 +1,3 @@
-import asyncio
-import threading
-
-
-class ThreadSafeCacheable:
-    def __init__(self, co):
-        self.co = co
-        self.done = False
-        self.result = None
-        self.lock = threading.Lock()
-
-    def __await__(self):
-        while True:
-            if self.done:
-                return self.result
-            if self.lock.acquire(blocking=False):
-                self.result = yield from self.co.__await__()
-                self.done = True
-                return self.result
-            else:
-                yield from asyncio.sleep(0.005)
-
-
-def cacheable(f):
-    def wrapped(*args, **kwargs):
-        r = f(*args, **kwargs)
-        return ThreadSafeCacheable(r)
-    return wrapped
-
 
 def divide_messages_for_embed(messages: list):
     msgs = []
@@ -52,6 +23,3 @@ def duration_to_string(duration: int):
         return "%dh %02dm %02ds" % (hour, minutes, seconds)
     else:
         return "%02dm %02ds" % (minutes, seconds)
-
-
-def head(async_iterator): return async_iterator.__anext__()

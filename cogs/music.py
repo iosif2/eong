@@ -4,8 +4,9 @@ import itertools
 import asyncio
 
 from async_timeout import timeout
-from functools import partial, lru_cache
+from functools import partial
 
+from async_lru import alru_cache
 import nextcord
 from nextcord import slash_command, message_command, user_command, SlashOption, Interaction, Message, Member
 from nextcord.ext import commands
@@ -56,8 +57,7 @@ class YTDLSource(nextcord.PCMVolumeTransformer):
         return self.__getattribute__(item)
 
     @classmethod
-    @lru_cache(maxsize=32)
-    @utils.cacheable
+    @alru_cache(maxsize=32)
     async def create_source(cls, member: nextcord.Member, search: str, *, bot: commands.Bot, download=False):
         loop = bot.loop or asyncio.get_event_loop()
 
@@ -565,7 +565,7 @@ class MusicCog(commands.Cog):
         for msg in msgs:
             if msgs.index(msg) == 0:
                 embed = nextcord.Embed(
-                    title=f'🎧 Queue for {interaction.guild.name} [Page({i + 1})/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
+                    title=f'🎧 Queue for {interaction.guild.name} [Page({msgs.index(msg) + 1})/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())
             else:
                 embed = nextcord.Embed(
                     title=f'[Page({msgs.index(msg) + 1}/{len(msgs)})]', description=msg, color=nextcord.Color.yellow())

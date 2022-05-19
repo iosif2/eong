@@ -42,7 +42,7 @@ def tts(txt, speaker):
 def get_keyword_info(t):
     for key, value in Config.keywords.items():
         if key in t:
-            if isinstance(list, value):
+            if isinstance(value, list):
                 return random.choice(value)
             return value
     return False
@@ -98,7 +98,7 @@ class TTSCog(commands.Cog):
         source = tts(message.content, voice)
 
         if source is None:
-            return await interaction.send('오류가 발생했습니다.')
+            return await interaction.send('오류가 발생했습니다.', ephemeral=True)
         logger.info(
             f'[TTS] author : {interaction.user}, voice : {voice}, text : {message.content}')
         voice_client = interaction.guild.voice_client
@@ -109,12 +109,11 @@ class TTSCog(commands.Cog):
             if interaction.user.voice:
                 await voice_client.move_to(interaction.user.voice.channel)
         if source is not None:
-            await utils.send_ephemeral_message(
-                interaction=interaction, content='**Read**')
             while voice_client.is_playing():
                 await asyncio.sleep(0.1)
             voice_client.play(nextcord.PCMVolumeTransformer(
                 original=nextcord.FFmpegPCMAudio(source), volume=Config.volume_tts))
+            await interaction.send(content='**Read**', ephemeral=True)
 
     @message_command(name='Filiz')
     async def _read_filiz(self, interaction: Interaction, message: Message):

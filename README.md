@@ -3,7 +3,7 @@
 [![GitHub](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 
 ## Intro
-eong is discord bot made by iosif
+Personal discord bot
 
 ### Required environment variables
 ```json
@@ -13,7 +13,6 @@ eong is discord bot made by iosif
 "AWS_KEY": "AWS Key for AWS Amazon polly"
 "REGION": "AWS Region"
 "guild_ids": "Server IDs for slash commands"
-"serviceKey": "serviceKey for OPENAPI-COVID_19" [deprecated]
 ```
 
 ### How to

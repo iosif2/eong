@@ -1,14 +1,13 @@
-
 def divide_messages_for_embed(messages: list):
     msgs = []
     embed_count = 0
-    msgs.append('')
+    msgs.append("")
     for msg in messages:
         if not isinstance(msg, str):
             continue
         if len(msgs[embed_count] + msg) > 3500:
             embed_count += 1
-            msgs.append('')
+            msgs.append("")
         msgs[embed_count] += msg + "\n"
     return msgs
 

@@ -1,0 +1,31 @@
+[tool.poetry]
+name = "eong"
+version = "2.0.0"
+description = "TTS, Music Bot"
+authors = ["iosif <iosif@iosif.app>"]
+license = "MIT License"
+
+[tool.poetry.dependencies]
+python = "^3.9"
+nextcord = "^2.0.0"
+requests = "^2.28.1"
+boto3 = "^1.24.31"
+xmltodict = "^0.13.0"
+python-dotenv = "^0.20.0"
+youtube_dl = "^2021.12.17"
+async-lru = "^1.0.3"
+PyNaCl = "^1.5.0"
+aiodns = "^3.0.0"
+Brotli = "^1.0.9"
+cchardet = "^2.1.7"
+orjson = "^3.7.7"
+
+[tool.poetry.dev-dependencies]
+pre-commit = "^2.20.0"
+black = "^22.6.0"
+flake8 = "^4.0.1"
+isort = "^5.10.1"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

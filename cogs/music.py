@@ -131,9 +131,7 @@ class MusicPlayer:
     async def create(cls, interaction: Interaction, players: list):
         if interaction.channel.type == nextcord.ChannelType.text:
             await interaction.channel.purge(limit=100, check=lambda m: m.author == interaction.client.user)
-            new_channel = await interaction.channel.create_thread(
-                name="eong music", type=nextcord.ChannelType.public_thread
-            )
+            new_channel = await interaction.channel.create_thread(name="🐈🎧", type=nextcord.ChannelType.public_thread)
         return cls(interaction, players, channel=new_channel)
 
     async def message_updater(self):
@@ -164,7 +162,8 @@ class MusicPlayer:
                     await self.set_embed_player(embed)
                     source = await self.queue.get()
             except asyncio.TimeoutError:
-                return self.client.loop.create_task(MusicPlayer.destroy(self.players, self._guild))
+                continue
+                # return self.client.loop.create_task(MusicPlayer.destroy(self.players, self._guild))
             if not isinstance(source, YTDLSource):
                 try:
                     source = await YTDLSource.regather_stream(source, loop=self.client.loop)
@@ -178,7 +177,7 @@ class MusicPlayer:
                 source,
                 after=lambda _: self.client.loop.call_soon_threadsafe(self.next.set),
             )
-            logger.info(f"player_loop(): Playing {source.title}")
+            logger.info(f"player_loop(): Playing {source.title} requester : {source.requester.name}")
             await asyncio.sleep(0.5)
             if self._guild.voice_client.is_playing():
                 embed = nextcord.Embed(
@@ -279,6 +278,7 @@ class MusicCog(commands.Cog):
         self.bot = bot
         self.players = {}
         self.saved_queue = {}
+        self.history = []
 
     async def get_player(self, interaction: Interaction, create=True):
         try:

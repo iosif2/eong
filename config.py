@@ -25,17 +25,16 @@ class Config:
         "비둘기": "/pigeon.mp3",
         "네이스": "/nayce.mp3",
         "기모링": "/gimoring.mp3",
-        "빡빡이": "/bald.mp3",
         "무야호": "/muyaho.mp3",
-        "시옹포포": "/sop.mp3",
         "muyaho": "/myh.mp3",
         "ㅃ!": "/byebye.mp3",
         "ㅂ!": "/bye.mp3",
         "안물": "/anmul.mp3",
-        "애옹": "/meow1.mp3",
+        "애옹": "/meow.mp3",
     }
 
     voices = {
+        " ": "Seoyeon",
         "t": "Takumi",
         "m": "Matthew",
         "f": "Filiz",

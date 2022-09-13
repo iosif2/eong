@@ -280,12 +280,15 @@ class MusicCog(commands.Cog):
         self.players = {}
         self.saved_queue = {}
 
-    async def get_player(self, interaction: Interaction):
+    async def get_player(self, interaction: Interaction, create=True):
         try:
             player = self.players[interaction.guild.id]
         except KeyError:
-            player = await MusicPlayer.create(interaction, self.players)
-            self.players[interaction.guild.id] = player
+            if create:
+                player = await MusicPlayer.create(interaction, self.players)
+                self.players[interaction.guild.id] = player
+            else:
+                return None
         return player
 
     @slash_command("clm", description="Clear messages")
@@ -356,10 +359,13 @@ class MusicCog(commands.Cog):
         voice_client = interaction.guild.voice_client
         if not voice_client or not voice_client.is_connected():
             return await interaction.send(content="☹️ Bot is **not connected**", delete_after=3)
-        player = await self.get_player(interaction)
-        player.queue._queue.clear()
-        voice_client.stop()
-        await player.destroy(self.players, interaction.guild)
+        player = await self.get_player(interaction, create=False)
+        if player is not None:
+            player.queue._queue.clear()
+            voice_client.stop()
+            await player.destroy(self.players, interaction.guild)
+        else:
+            await voice_client.disconnect()
         await interaction.send(f"😼 **Disconnected** [{interaction.user.mention}]", delete_after=5)
 
     async def play(self, interaction: nextcord.Interaction, search: str, ephemeral=False):

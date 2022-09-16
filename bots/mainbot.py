@@ -12,7 +12,9 @@ from .musicbot import MusicBot as Music
 
 class MainBot(commands.Bot):
     def __init__(self):
-        super().__init__(self)
+        intents = nextcord.Intents.default()
+        intents.message_content = True
+        super().__init__(intents=intents)
         self.command_prefix = "`"
         for filename in os.listdir("./cogs"):
             if filename.endswith(".py"):

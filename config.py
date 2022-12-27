@@ -14,7 +14,7 @@ class Config:
     aws_secret_access_key = os.getenv("AWS_KEY")
     region_name = os.getenv("REGION")
 
-    SERVER_URL = "https://iosif.app"
+    SERVER_URL = "https://iosif.dev"
 
     ENDPOINTS = {"FILES": "/files"}
 
@@ -44,8 +44,8 @@ class Config:
     }
 
     prefix = ";"
-    volume_tts = 0.5
-    volume_music = 0.05
+    volume_tts = 0.02
+    volume_music = 0.02
 
     status_messages = ["😼", "eong", "😺", "😻", "😾", "🙀", "🐈", "😹", "애옹"]
 

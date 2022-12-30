@@ -44,8 +44,8 @@ class Config:
     }
 
     prefix = ";"
-    volume_tts = 0.02
-    volume_music = 0.02
+    volume_tts = 0.07
+    volume_music = 0.10
 
     status_messages = ["😼", "eong", "😺", "😻", "😾", "🙀", "🐈", "😹", "애옹"]
 
